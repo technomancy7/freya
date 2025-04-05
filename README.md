@@ -5,20 +5,20 @@ The idea is that the core is flexible enough that almost any functionality can b
 (Heavily WIP)
 
 # Todo
-[ ] Port commands over from my previous project
-[ ] Application manager
-[ ] Appimage manager
-[ ] Command to open files in editor
-[ ] Config editor commands
-[ ] Repl mode using Buns shell interface as a fallback for if input isnt a command
-[ ] RNG commands, number generator, coin flip, select from list
-[ ] Cards simulator
-[ ] Tarot
-[ ] Text Adventure engine
-[ ] Tamagotchi-style thing
-[ ] Codex
-[ ] 333networks interface
-[ ] Internet radio
-[ ] Simple memo
-[ ] Wikipedia summary
-[ ] AI?
+- [ ] Port commands over from my previous project
+- [ ] Application manager
+- [ ] Appimage manager
+- [ ] Command to open files in editor
+- [ ] Config editor commands
+- [ ] Repl mode using Buns shell interface as a fallback for if input isnt a command
+- [ ] RNG commands, number generator, coin flip, select from list
+- [ ] Cards simulator
+- [ ] Tarot
+- [ ] Text Adventure engine
+- [ ] Tamagotchi-style thing
+- [ ] Codex
+- [ ] 333networks interface
+- [ ] Internet radio
+- [ ] Simple memo
+- [ ] Wikipedia summary
+- [ ] AI?
