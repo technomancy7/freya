@@ -41,6 +41,13 @@ export class Action {
                     }
                 }
                 break;
+            
+            case "set":
+            case "edit":
+            case "search":
+                console.log("Not yet implemented.");
+                break;
+                
             default:
                 this.ctx.write_panel(':right_arrow: [strike_through]Unknown [red]command[reset].');
         }
