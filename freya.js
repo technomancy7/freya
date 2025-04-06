@@ -16,6 +16,8 @@ class Context {
             "reset": '\033[0m',
             "red": Bun.color("red", "ansi"),
             "green": Bun.color("green", "ansi"),
+            "blue": Bun.color("blue", "ansi"),
+            "yellow": Bun.color("yellow", "ansi"),
             "bold": "\u001b[1m",
             "dim": "\u001b[2m",
             "italic": "\u001b[3m",
@@ -50,13 +52,49 @@ class Context {
         }
     }
     
+    async edit_file(path) {
+        console.log("Opening", path, "in", process.env.EDITOR)
+        await $`$EDITOR ${path}`;
+    }
+    
+    coerce_type(input) {
+        // Trim the input to remove extra whitespace
+        const trimmedInput = input.trim();
+
+        // Check for boolean values
+        if (trimmedInput.toLowerCase() === "true") {
+            return true;
+        }
+        if (trimmedInput.toLowerCase() === "false") {
+            return false;
+        }
+
+        // Check for numeric values
+        if (!isNaN(trimmedInput) && trimmedInput !== "") {
+            return parseFloat(trimmedInput); // Converts to number (integer or float)
+        }
+
+        // Check for quoted strings
+        if (
+            (trimmedInput.startsWith('"') && trimmedInput.endsWith('"')) ||
+            (trimmedInput.startsWith("'") && trimmedInput.endsWith("'"))
+        ) {
+            return trimmedInput.slice(1, -1); // Remove surrounding quotes
+        }
+        
+        // Default to returning the original string
+        return trimmedInput;
+    }
+    xeval(obj) {
+        return eval?.(`"use strict";(${obj})`);
+    }
     format_text(text) {
         for(const [name, colour] of Object.entries(this.fmt)) {
-           text = text.replace(`[${name}]`, colour); 
+           text = text.replaceAll(`[${name}]`, colour); 
         }
         
         for(const [name, emoji] of Object.entries(this.emojis)) {
-           text = text.replace(`:${name}:`, emoji); 
+           text = text.replaceAll(`:${name}:`, emoji); 
         }
         
         return text;
@@ -71,10 +109,11 @@ class Context {
         return res.text().trim();
     }
     
-    async write_panel(text) {
+    async write_panel(title, text) {
         text = this.format_text(text);
-        await $`gum style --border normal "${text}"`
+        await $`gum style --border double --width 50 "${this.fmt.bold}[${title}]${this.fmt.reset}" "${text}"`
     }
+    
     async load_all_data(directory) {
         let output = {}
         
@@ -143,17 +182,32 @@ class Context {
         const cmd_exists = await file.exists();
         
         if(this.command && !cmd_exists){
-            return console.log("Command does not exist.")
+            return this.writeln("Command does not exist.")
         }
         
         if(this.args.help) {
             if(this.command) {
                 const action = require(cmd_path);
                 let act = new action.Action(this)
-                console.log(act.help.text)
+                this.writeln(`[bold]${act.help.title || this.command}[reset] (v${act.help.version} by ${act.help.author})`)
+                this.writeln(act.help.text);
+                if(act.help.commands){
+                    this.writeln("\nCommands:")
+                    for(const com of act.help.commands) {
+                        this.writeln("\t"+com)
+                    }
+                }
+                
+                if(act.help.parameters){
+                    this.writeln("\nParameters:")
+                    for(const parm of act.help.parameters) {
+                        this.writeln("\t"+parm)
+                    }
+                }
+
                 return;
             }else{
-                console.log("Help on freya itself")
+                this.writeln("Help on freya itself")
                 return;
             }
 
