@@ -1,13 +1,90 @@
 const argv = require('yargs-parser')(process.argv.slice(2))
 import TOML from 'smol-toml'
+import { Glob } from "bun";
+import { $ } from "bun";
 
 class Context {
     constructor() {
         this.args = {}
         this.command = ""
-        this.line = ""
+        this.line = []
         this.config = {}
         this.home = process.env.OVERRIDE_HOME || process.env.HOME+"/.freya/";
+        this.data_dir = this.home+"/data/"
+        
+        this.fmt = {
+            "reset": '\033[0m',
+            "red": Bun.color("red", "ansi"),
+            "green": Bun.color("green", "ansi"),
+            "bold": "\u001b[1m",
+            "dim": "\u001b[2m",
+            "italic": "\u001b[3m",
+            "underline": "\u001b[4m",
+            "blink": "\u001b[5m",
+            "reverse": "\u001b[7m",
+            "hidden": "\u001b[8m",
+            "strike_through": "\u001b[9m",
+        }
+        this.emojis = {
+            "right_arrow": "➡️",
+            "smile": "😊",
+            "heart": "❤️",
+            "thumbs_up": "👍",
+            "clap": "👏",
+            "fire": "🔥",
+            "star": "⭐",
+            "check_mark": "✔️",
+            "wave": "👋",
+            "laugh": "😂",
+            "wink": "😉",
+            "cry": "😢",
+            "angry": "😡",
+            "party": "🥳",
+            "thinking": "🤔",
+            "sunglasses": "😎",
+            "kiss": "😘",
+            "hug": "🤗",
+            "sleepy": "😴",
+            "poop": "💩",
+            "rocket": "🚀"
+        }
+    }
+    
+    format_text(text) {
+        for(const [name, colour] of Object.entries(this.fmt)) {
+           text = text.replace(`[${name}]`, colour); 
+        }
+        
+        for(const [name, emoji] of Object.entries(this.emojis)) {
+           text = text.replace(`:${name}:`, emoji); 
+        }
+        
+        return text;
+    }
+    writeln(text) {
+        text = this.format_text(text);
+        console.log(text);
+    }
+    
+    async get_input(placeholder) {
+        const res = await $`gum input --placeholder "${placeholder}"`;
+        return res.text().trim();
+    }
+    
+    async write_panel(text) {
+        text = this.format_text(text);
+        await $`gum style --border normal "${text}"`
+    }
+    async load_all_data(directory) {
+        let output = {}
+        
+        const glob = new Glob("*");
+
+        for (const file of glob.scanSync(this.data_dir+directory)) {
+            let key = file.split(".")[0];
+            output[key] = await this.load_data(directory, key)
+        }
+        return output;
     }
     
     async load_data(directory, filename = "data") {
