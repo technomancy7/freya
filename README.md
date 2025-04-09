@@ -6,8 +6,9 @@ The idea is that the core is flexible enough that almost any functionality can b
 
 # Todo
 - [ ] Port commands over from my previous project
-- [ ] Application manager
-- [ ] Appimage manager
+- [X] Application manager
+- [X] Appimage manager
+- [ ] TTS chat responder
 - [ ] Command to open files in editor
 - [ ] Config editor commands
 - [ ] Repl mode using Buns shell interface as a fallback for if input isnt a command
@@ -16,9 +17,10 @@ The idea is that the core is flexible enough that almost any functionality can b
 - [ ] Tarot
 - [ ] Text Adventure engine
 - [ ] Tamagotchi-style thing
-- [ ] Codex
+- [X] Codex
 - [ ] 333networks interface
 - [ ] Internet radio
 - [ ] Simple memo
-- [ ] Wikipedia summary
+- [X] Wikipedia summary
+- [ ] Search engines
 - [ ] AI?

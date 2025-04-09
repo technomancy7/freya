@@ -1,6 +1,2 @@
-test = true
-lols = false
-losos = false
-
-[self]
-name = "Kaiser"
+[aim]
+directory = "/home/kaiz0r/.appimages/"

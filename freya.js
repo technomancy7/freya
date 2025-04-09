@@ -11,7 +11,7 @@ class Context {
         this.config = {}
         this.home = process.env.OVERRIDE_HOME || process.env.HOME+"/.freya/";
         this.data_dir = this.home+"/data/"
-        
+        this.glob = new Glob("*");
         this.fmt = {
             "reset": '\033[0m',
             "red": Bun.color("red", "ansi"),
@@ -51,7 +51,15 @@ class Context {
             "rocket": "🚀"
         }
     }
-    
+
+    async download_file(url, out_path) {
+        let filename = url.split("/").slice(-1)[0];
+        console.log(`Downloading ${filename} to ${out_path}`)
+        await $`curl --skip-existing --output ${out_path+filename} "${url}"`
+        return out_path+filename, filename
+    }
+        
+        
     async edit_file(path) {
         console.log("Opening", path, "in", process.env.EDITOR)
         await $`$EDITOR ${path}`;
@@ -103,6 +111,17 @@ class Context {
         text = this.format_text(text);
         console.log(text);
     }
+        
+    async get_choice(choices) {
+        if(choices.length == 1) return choices[0]
+        let fmt = [];
+        for(const choice of choices){
+            fmt.push(`"${choice}"`)
+        }
+        const res = await $`gum choose ${{ raw: fmt.join(" ") }}`;
+        return res.text().trim();
+    }
+    
     
     async get_input(placeholder) {
         const res = await $`gum input --placeholder "${placeholder}"`;
@@ -116,10 +135,8 @@ class Context {
     
     async load_all_data(directory) {
         let output = {}
-        
-        const glob = new Glob("*");
 
-        for (const file of glob.scanSync(this.data_dir+directory)) {
+        for (const file of this.glob.scanSync(this.data_dir+directory)) {
             let key = file.split(".")[0];
             output[key] = await this.load_data(directory, key)
         }
