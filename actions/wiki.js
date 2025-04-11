@@ -20,7 +20,7 @@ export class Action {
         
         switch(cmd) {
             case "summary":
-            case "s"
+            case "s":
                 const summary = await wiki.summary(line);
                 this.ctx.writeln(summary.extract);
                 break;

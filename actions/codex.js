@@ -4,12 +4,13 @@ export class Action {
         this.help = {
             "title": "Codex",
             "text": "Generic data storage and retrieval.",
-            "commands": ["list", "set", "get", "edit"],
-            "parameters": ["--json (Changes output to json instead of formatting)"],
+            "commands": ["list", "set,Format: db.parent.key = value", "get,Format: [database.]entry_name", "edit,Opens given database file in default editor."],
+            "parameters": ["--json,Changes output to json instead of formatting", "--filter [key==value or key!=value]"],
             "author": "Techno",
             "version": "0.4"
         }
     }
+    
     async format_entry(data) {
         if(this.ctx.args.json)
             console.log(data)
@@ -36,10 +37,36 @@ export class Action {
                     }
                 }
             }
-            this.ctx.write_panel(data._key_, output.join("\n"))
+            this.ctx.write_panel(data._parent_+"."+data._key_, output.join("\n"))
         }
     }
     
+    checkFilter(data) {
+        let filter = this.ctx.args.filter;
+        if(!filter) return true;
+        let filter_type = "";
+        let filter_key = "";
+        let filter_value = "";
+        
+        if(filter.includes("==")) {
+            filter_type = "==";
+            filter_key = filter.split("==")[0].trim();
+            filter_value = filter.split("==")[1].trim();
+        }
+        
+        if(filter.includes("!=")) {
+            filter_type = "!=";
+            filter_key = filter.split("!=")[0].trim();
+            filter_value = filter.split("!=")[1].trim();
+        }
+
+        if(filter_type == "=="){
+            return data[filter_key] == filter_value;
+        }
+        if(filter_type == "!="){
+            return data[filter_key] != filter_value;
+        }
+    }
     async on_execute() {
         const cmd = this.ctx.line[0];
         const params = this.ctx.line.slice(1)
@@ -49,12 +76,15 @@ export class Action {
         switch (cmd) {
             case 'list':
             case 'ls':
+
                 data = await this.ctx.load_all_data("codex")
+                
                 if(line) {
                     for (const [key, value] of Object.entries(data[line])) {
-                        if(value._self_ && value._self_._hidden_ == true) continue;
+                        if(!this.checkFilter(value)) continue;
                         if(!value.hidden) {
                             value._key_ = key;
+                            value._parent_ = line;
                             await this.format_entry(value);
                         }
                     }
@@ -62,8 +92,10 @@ export class Action {
                     for (const [parent, datafile] of Object.entries(data)) {
                         for (const [key, value] of Object.entries(datafile)) {
                             if(value._self_ && value._self_._hidden_ == true) continue;
+                            if(!this.checkFilter(value)) continue;
                             if(!value._hidden_) {
                                 value._key_ = key;
+                                value._parent_ = parent;
                                 await this.format_entry(value);
                             }
                         }
@@ -73,13 +105,24 @@ export class Action {
                 break;
                 
             case 'get':
+                let pointer = line;
+                let ptrdb = undefined;
+                
+                if(line.includes(".")) {
+                    pointer = line.split(".")[1];
+                    ptrdb = line.split(".")[0];
+                }
                 data = await this.ctx.load_all_data("codex")
                 for (const [parent, datafile] of Object.entries(data)) {
+                    if(ptrdb && ptrdb != parent) continue;
                     for (const [key, value] of Object.entries(datafile)) {
                         if(value._self_ && value._self_.hidden == true) continue;
-                        if(key == line) {
+                        if(!this.checkFilter(value)) continue;
+                        if(key == pointer) {
                             value._key_ = key;
+                            value._parent_ = parent;
                             await this.format_entry(value);
+                            return;
                         }
                     }
                 }
@@ -100,10 +143,6 @@ export class Action {
             case "edit":
                 await this.ctx.edit_file(this.ctx.data_dir+"/codex/"+line+".toml")
                 break
-                
-            case "search":
-                console.log("Not yet implemented.");
-                break;
                 
             default:
                 this.ctx.write_panel(':right_arrow: [strike_through]Unknown [red]command[reset].');

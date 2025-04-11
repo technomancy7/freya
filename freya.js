@@ -29,6 +29,7 @@ class Context {
         }
         this.emojis = {
             "right_arrow": "➡️",
+            "loop_arrow": "↪",
             "smile": "😊",
             "heart": "❤️",
             "thumbs_up": "👍",
@@ -111,21 +112,44 @@ class Context {
         text = this.format_text(text);
         console.log(text);
     }
-        
+    
+    async filter_choice(choices) {
+        /*if(choices.length == 1) return choices[0]
+        let fmt = [];
+        for(const choice of choices){
+            fmt.push(`"${choice}"`)
+        }*/
+
+        //const res = await $`gum filter ${{ raw: fmt.join(" ") }}`;
+        //res.text().trim();
+        const proc = Bun.spawn(["gum", "filter", ...choices]);
+        const text = await new Response(proc.stdout).text();
+
+        return text
+    }
+    
     async get_choice(choices) {
-        if(choices.length == 1) return choices[0]
+        /*if(choices.length == 1) return choices[0]
         let fmt = [];
         for(const choice of choices){
             fmt.push(`"${choice}"`)
         }
         const res = await $`gum choose ${{ raw: fmt.join(" ") }}`;
-        return res.text().trim();
+        return res.text().trim();*/
+        const proc = Bun.spawn(["gum", "choice", ...choices]);
+        const text = await new Response(proc.stdout).text();
+
+        return text
     }
     
     
     async get_input(placeholder) {
-        const res = await $`gum input --placeholder "${placeholder}"`;
-        return res.text().trim();
+        //const res = await $`gum input --placeholder "${placeholder}"`;
+        //return res.text().trim();
+        const proc = Bun.spawn(["gum", "input", "--placeholder", placeholder]);
+        const text = await new Response(proc.stdout).text();
+
+        return text
     }
     
     async write_panel(title, text) {
@@ -193,7 +217,7 @@ class Context {
         this.line = args._.slice(1)
     }
     
-    async execute() {
+    async execute(new_command = undefined) {
         const cmd_path = this.home+"/actions/"+this.command+".js";
         const file = Bun.file(cmd_path);
         const cmd_exists = await file.exists();
@@ -211,14 +235,28 @@ class Context {
                 if(act.help.commands){
                     this.writeln("\nCommands:")
                     for(const com of act.help.commands) {
-                        this.writeln("\t"+com)
+                        if(com.includes(",")){
+                            this.writeln("\t"+com.split(",")[0])
+                            let help_line = com.split(",").slice(1).join(",");
+                            this.writeln("\t  ↪ "+help_line)
+                        } else {
+                            this.writeln("\t"+com) 
+                        }
+                        
                     }
                 }
                 
                 if(act.help.parameters){
                     this.writeln("\nParameters:")
                     for(const parm of act.help.parameters) {
-                        this.writeln("\t"+parm)
+                        //this.writeln("\t"+parm)
+                        if(parm.includes(",")){
+                            this.writeln("\t"+parm.split(",")[0])
+                            let help_line = parm.split(",").slice(1).join(",");
+                            this.writeln("\t  ↪ "+help_line)
+                        } else {
+                            this.writeln("\t"+parm) 
+                        }
                     }
                 }
 
