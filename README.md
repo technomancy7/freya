@@ -10,8 +10,8 @@ The idea is that the core is flexible enough that almost any functionality can b
 - [X] Appimage manager
 - [ ] TTS chat responder
 - [ ] Command to open files in editor
-- [ ] Config editor commands
-- [ ] Repl mode using Buns shell interface as a fallback for if input isnt a command
+- [X] Config editor commands
+- [X] Repl mode using Buns shell interface as a fallback for if input isnt a command
 - [X] RNG commands, number generator, coin flip, select from list
 - [ ] Cards simulator
 - [ ] Tarot
@@ -20,7 +20,9 @@ The idea is that the core is flexible enough that almost any functionality can b
 - [X] Codex
 - [ ] 333networks interface
 - [ ] Internet radio
-- [ ] Simple memo
+- [X] Simple memo
 - [X] Wikipedia summary
-- [ ] Search engines
+- [X] Search engines
+- [ ] Redis integration
+- [ ] SQLite
 - [ ] AI?

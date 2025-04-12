@@ -1,2 +1,9 @@
 [aim]
 directory = "/home/kaiz0r/.appimages/"
+
+[rpg]
+level = 2
+exp = 5
+
+[memo]
+text = "\\"

@@ -7,7 +7,7 @@ export class Action {
         this.help = {
             "title": "",
             "text": "",
-            "commands": [],
+            "commands": ["run <app>", "get <app>", "ls"],
             "parameters": [],
             "author": "",
             "version": "0.1"
