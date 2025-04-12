@@ -27,13 +27,29 @@ export class Action {
                             i = i + 1;
                         }
                     } else {
-                        output.push(`[green]${key}[reset] = [yellow]"${val}"[reset]`)
+                        if(val.startsWith("@ ")) {
+                            let ts = this.ctx.dayjs(val.slice(2), "DD-MM-YYYY")
+
+                            //if(ts.isBefore(this.ctx.dayjs()))
+                                //output.push(`[green]${key}[reset] = [yellow]"< ${ts.fromNow()}"[reset]`)
+                            //else
+                            output.push(`[green]${key}[reset] = [cyan]"${ts.fromNow()}"[reset]`)
+                        } else {
+                            output.push(`[green]${key}[reset] = [yellow]"${val}"[reset]`)
+                        }
+                        
                     }
                 } else if(typeof val == "number" || typeof val == "boolean") {
                     output.push(`[green]${key}[reset] = [yellow]${val}[reset]`)
                 } else if(typeof val == "object" || val.isArray()) {
+                    output.push(`[green]${key}[reset]:`)
                     for(const line of val) {
-                        output.push(`[green]${key}[reset][ ] = [yellow]"${line}"[reset]`);
+                        if(line.startsWith("x ")) {
+                            output.push(` - [[green]X[reset]] [yellow]"${line.slice(2)}"[reset]`);
+                        } else {
+                            output.push(` - [ ] [yellow]"${line}"[reset]`);
+                        }
+                        
                     }
                 }
             }

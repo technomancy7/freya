@@ -5,6 +5,8 @@ import { $ } from "bun";
 const dayjs = require('dayjs')
 var relativeTime = require("dayjs/plugin/relativeTime");
 dayjs.extend(relativeTime)
+var customParseFormat = require("dayjs/plugin/customParseFormat");
+dayjs.extend(customParseFormat);
 const FREYA_VERSION = "25.04.12"
 
 class Context {
@@ -22,6 +24,7 @@ class Context {
             "red": Bun.color("red", "ansi"),
             "green": Bun.color("green", "ansi"),
             "blue": Bun.color("blue", "ansi"),
+            "cyan":Bun.color("cyan", "ansi"),
             "yellow": Bun.color("yellow", "ansi"),
             "bold": "\u001b[1m",
             "dim": "\u001b[2m",
