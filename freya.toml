@@ -7,3 +7,12 @@ exp = 5
 
 [memo]
 text = "\\"
+
+[aliases]
+sys = "system"
+app = "appman"
+cdx = "codex"
+
+[test]
+one = "true"
+num = 5

@@ -25,6 +25,7 @@ class Context {
             "green": Bun.color("green", "ansi"),
             "blue": Bun.color("blue", "ansi"),
             "cyan":Bun.color("cyan", "ansi"),
+            "orange":Bun.color("orange", "ansi"),
             "yellow": Bun.color("yellow", "ansi"),
             "bold": "\u001b[1m",
             "dim": "\u001b[2m",
@@ -171,7 +172,7 @@ class Context {
     
     async write_panel(title, text) {
         text = this.format_text(text);
-        await $`gum style --border double --width 50 "${this.fmt.bold}[${title}]${this.fmt.reset}" "${text}"`
+        await $`gum style --border double "${this.fmt.bold}[${title}]${this.fmt.reset}" "${text}"`
         
         //const proc = Bun.spawn(["gum", "style", "--border", "double", "--width", 50, `${this.fmt.bold}[${title}]${this.fmt.reset}`, text ]);
         //const out = await new Response(proc.stdout).text();
@@ -233,8 +234,20 @@ class Context {
             return this.config[parent][sub];
             
         } else {
-            return this.config[key] | default_value;
+            return this.config[key] || default_value;
         }
+    }
+    
+    incr(key, m = 1) {
+        let v = this.get_config(key, 1);
+        this.set_config(key, v + m);
+        return v + m;
+    }
+    
+    decr(key, m = 1) {
+        let v = this.get_config(key, 1);
+        this.set_config(key, v - m);
+        return v - m;
     }
     
     process_args(args) {
@@ -266,7 +279,6 @@ class Context {
     
     async get_user_name() {
         let codex = await this.load_data("codex", "addrbook")
-        console.log(codex)
         return codex.self["Display Name"] || codex.self.name || "self.user";
     }
     
@@ -317,7 +329,11 @@ class Context {
             this.command = new_command.split(" ")[0];
             this.line =  new_command.split(" ").slice(1);
         }
-        
+        if(this.command == undefined) {
+            this.args.help = true;
+        }
+        const alias = await this.get_config("aliases."+this.command)
+        if(alias) this.command = alias;
         if(this.command == "repl"){
             await this.repl();
             return;

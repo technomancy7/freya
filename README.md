@@ -16,6 +16,7 @@ The idea is that the core is flexible enough that almost any functionality can b
 - [ ] Cards simulator
 - [ ] Tarot
 - [ ] Text Adventure engine
+- [ ] Text-based survival game, oregon trail style
 - [ ] Tamagotchi-style thing
 - [X] Codex
 - [ ] 333networks interface
@@ -26,3 +27,4 @@ The idea is that the core is flexible enough that almost any functionality can b
 - [ ] Redis integration
 - [ ] SQLite
 - [ ] AI?
+- [ ] GUI? (Native, not web app)

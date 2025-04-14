@@ -1,11 +1,13 @@
+import { $ } from "bun";
+
 export class Action {
     constructor(ctx) {
         this.ctx = ctx;
         this.help = {
             "title": "Codex",
             "text": "Generic data storage and retrieval.",
-            "commands": ["list", "set,Format: db.parent.key = value", "get,Format: [database.]entry_name", "edit,Opens given database file in default editor."],
-            "parameters": ["--json,Changes output to json instead of formatting", "--filter [key==value or key!=value]"],
+            "commands": ["list", "set,Format: db.parent.key = value", "get,Format: entry_name[.key]", "edit,Opens given database file in default editor."],
+            "parameters": ["--json,Changes output to json instead of formatting", "--filter [key==value or key!=value]", "--open [key],If used on get, opens key in browser."],
             "author": "Techno",
             "version": "0.4"
         }
@@ -29,10 +31,6 @@ export class Action {
                     } else {
                         if(val.startsWith("@ ")) {
                             let ts = this.ctx.dayjs(val.slice(2), "DD-MM-YYYY")
-
-                            //if(ts.isBefore(this.ctx.dayjs()))
-                                //output.push(`[green]${key}[reset] = [yellow]"< ${ts.fromNow()}"[reset]`)
-                            //else
                             output.push(`[green]${key}[reset] = [cyan]"${ts.fromNow()}"[reset]`)
                         } else {
                             output.push(`[green]${key}[reset] = [yellow]"${val}"[reset]`)
@@ -92,7 +90,6 @@ export class Action {
         switch (cmd) {
             case 'list':
             case 'ls':
-
                 data = await this.ctx.load_all_data("codex")
                 
                 if(line) {
@@ -122,23 +119,41 @@ export class Action {
                 
             case 'get':
                 let pointer = line;
-                let ptrdb = undefined;
+                let ptrdb = this.ctx.args.db || undefined;
+                let spec_key = undefined;
                 
                 if(line.includes(".")) {
-                    pointer = line.split(".")[1];
-                    ptrdb = line.split(".")[0];
+                    pointer = line.split(".")[0];
+                    spec_key = line.split(".")[1];
                 }
-                data = await this.ctx.load_all_data("codex")
+                
+                data = await this.ctx.load_all_data("codex");
+
                 for (const [parent, datafile] of Object.entries(data)) {
                     if(ptrdb && ptrdb != parent) continue;
                     for (const [key, value] of Object.entries(datafile)) {
                         if(value._self_ && value._self_.hidden == true) continue;
                         if(!this.checkFilter(value)) continue;
+                        
                         if(key == pointer) {
-                            value._key_ = key;
-                            value._parent_ = parent;
-                            await this.format_entry(value);
-                            return;
+                            if(spec_key) {
+                                if(this.ctx.args.open) {
+                                    await $`xdg-open ${value[spec_key]}`;
+                                } else {
+                                    this.ctx.writeln(`${key}.${spec_key} = ${value[spec_key]}`);
+                                }
+                               
+                            } else {
+                                if(this.ctx.args.open) {
+                                    await $`xdg-open ${value[this.ctx.args.open]}`;
+                                    return;
+                                } 
+                                value._key_ = key;
+                                value._parent_ = parent;
+                                await this.format_entry(value);
+                                return;
+                            }
+
                         }
                     }
                 }

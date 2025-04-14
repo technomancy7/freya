@@ -17,7 +17,7 @@ export class Action {
         let pre = "";
         let pos = "";
         if(quest.completed){pre = "[strike_through]"; pos = "[reset]"}
-        if(quest.exp) exp = ` [green](EXP: +${quest.exp})[reset]`
+        if(quest.exp) exp = `\n[green](EXP: +${quest.exp})[reset]`
         await this.ctx.write_panel(`${quest.key} -> ${ts}`, `${pre}${quest.text}${pos}${exp}`)
     }
 
@@ -30,6 +30,11 @@ export class Action {
         const data = await this.ctx.load_data("quests");
         
         switch(cmd) {
+            case "edit":
+            case "e":
+                await this.ctx.edit_file(this.ctx.data_dir+"/quests/data.toml")
+                break;
+                
             case "n":
             case "new":
             case "add":
