@@ -80,8 +80,9 @@ class Context {
         
         
     async edit_file(path) {
-        console.log("Opening", path, "in", process.env.EDITOR)
-        await $`$EDITOR ${path}`;
+        let editor = this.get_config("tools.editor")
+        console.log("Opening", path, "in tools.editor: ", editor)
+        await $`${editor} ${path}`;
     }
     
     coerce_type(input) {

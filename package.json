@@ -6,7 +6,6 @@
     "yargs-parser": "^21.1.1"
   },
   "scripts": {
-    "b": "bun build freya.js --compile && mv freya $HOME/.local/bin/freya",
-    "fr": "mv $HOME/.local/bin/freya $HOME/.local/bin/fr"
+    "b": "bun build freya.js --compile && mv freya $HOME/.local/bin/fr"
   }
 }

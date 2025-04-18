@@ -1,5 +1,6 @@
 import { $ } from "bun";
-
+//TODO
+//make the set command only take key.value and use --db to specify file, use "default" if not given
 export class Action {
     constructor(ctx) {
         this.ctx = ctx;
@@ -31,7 +32,7 @@ export class Action {
                     } else {
                         if(val.startsWith("@ ")) {
                             let ts = this.ctx.dayjs(val.slice(2), "DD-MM-YYYY")
-                            output.push(`[green]${key}[reset] = [cyan]"${ts.fromNow()}"[reset]`)
+                            output.push(`[green]${key}[reset] = [cyan]"${ts.fromNow()}"[reset] (${val.slice(2)})`)
                         } else {
                             output.push(`[green]${key}[reset] = [yellow]"${val}"[reset]`)
                         }
@@ -82,22 +83,23 @@ export class Action {
         }
     }
     async on_execute() {
-        const cmd = this.ctx.line[0];
+        const cmd = this.ctx.line[0] || "ls";
         const params = this.ctx.line.slice(1)
         const line = params.join(" ")
+        let db = this.ctx.args.db;
         let data = {}
-        
+
         switch (cmd) {
             case 'list':
             case 'ls':
                 data = await this.ctx.load_all_data("codex")
                 
-                if(line) {
-                    for (const [key, value] of Object.entries(data[line])) {
+                if(db && typeof db == "string") {
+                    for (const [key, value] of Object.entries(data[db])) {
                         if(!this.checkFilter(value)) continue;
                         if(!value.hidden) {
                             value._key_ = key;
-                            value._parent_ = line;
+                            value._parent_ = db;
                             await this.format_entry(value);
                         }
                     }
@@ -119,7 +121,6 @@ export class Action {
                 
             case 'get':
                 let pointer = line;
-                let ptrdb = this.ctx.args.db || undefined;
                 let spec_key = undefined;
                 
                 if(line.includes(".")) {
@@ -130,7 +131,7 @@ export class Action {
                 data = await this.ctx.load_all_data("codex");
 
                 for (const [parent, datafile] of Object.entries(data)) {
-                    if(ptrdb && ptrdb != parent) continue;
+                    if(db && db != parent) continue;
                     for (const [key, value] of Object.entries(datafile)) {
                         if(value._self_ && value._self_.hidden == true) continue;
                         if(!this.checkFilter(value)) continue;
@@ -161,14 +162,37 @@ export class Action {
             
             case "set":
                 data = await this.ctx.load_all_data("codex")
-                let db = line.split("=")[0].split(".")[0].trim();
-                let parent = line.split("=")[0].split(".")[1].trim();
-                let sub = line.split("=")[0].split(".")[2].trim();
-                let val = this.ctx.coerce_type(line.split("=").slice(1).join("=").trim());
+                if(!db) db = "default"
+                let parent = params[0].split(".")[0].trim();
+                let sub = params[0].split(".")[1].trim();
+                let val = this.ctx.coerce_type(params.slice(1).join(" ").trim());
                 if(data[db] == undefined) data[db] = {}
                 if(data[db][parent] == undefined) data[db][parent] = {}
                 data[db][parent][sub] = val;
                 await this.ctx.save_data(data[db], "codex", db)
+                this.ctx.writeln(`${db}.${parent}.${sub} = ${val} (${typeof val})`)
+                break;
+                
+            case "unset":
+                data = await this.ctx.load_all_data("codex")
+                if(!db) db = "default"
+                let uparent = line.split(".")[0].trim();
+                let usub = line.split(".")[1].trim();
+                if(data[db] == undefined) return this.ctx.writeln("Entry does not exist.")
+                if(data[db][uparent] == undefined) return this.ctx.writeln("Entry does not exist.")
+                delete data[db][uparent][usub];
+                this.ctx.writeln(`Removed key.`)
+                await this.ctx.save_data(data[db], "codex", db)
+                break;
+                
+            case "delete":
+            case "del":
+                let dbf = Bun.file(`${this.ctx.home}/data/codex/${line}.toml`)
+                let exists = await dbf.exists();
+                if(!exists) return this.ctx.writeln("File not found.")
+                if(confirm(`Really delete database [${line}]?`)) {
+                    await dbf.delete();
+                }
                 break;
                 
             case "edit":

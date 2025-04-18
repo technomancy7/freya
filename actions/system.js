@@ -81,8 +81,9 @@ export class Action {
                 break;
                 
             case "set":
-                this.ctx.writeln(`[orange]${params[0]}[reset] = [orange]${params[1]}[reset] `);
-                this.ctx.set_config(params[0], params[1])
+                let v = this.ctx.coerce_type(params[1])
+                this.ctx.writeln(`[orange]${params[0]}[reset] = [orange]${params[1]}[reset] (${typeof v})`);
+                this.ctx.set_config(params[0], v)
                 await this.ctx.save_config();
                 break;
                 

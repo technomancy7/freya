@@ -1,9 +1,12 @@
 [aim]
 directory = "/home/kaiz0r/.appimages/"
 
+[tools]
+editor = "kwrite"
+
 [rpg]
 level = 2
-exp = 5
+exp = 25
 
 [memo]
 text = "\\"
@@ -12,6 +15,7 @@ text = "\\"
 sys = "system"
 app = "appman"
 cdx = "codex"
+q = "quests"
 
 [test]
 one = "true"
