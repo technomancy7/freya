@@ -16,7 +16,8 @@ export class Action {
     
     async format_entry(data) {
         if(this.ctx.args.json)
-            console.log(data)
+            //console.log(data)
+            console.log(`${JSON.stringify(data)}`)
         else {
             let output = [];
             for(let [key, val] of Object.entries(data)){
@@ -93,7 +94,7 @@ export class Action {
             case 'list':
             case 'ls':
                 data = await this.ctx.load_all_data("codex")
-                
+                if(this.ctx.args.json) return console.log(`${JSON.stringify(data)}`)
                 if(db && typeof db == "string") {
                     for (const [key, value] of Object.entries(data[db])) {
                         if(!this.checkFilter(value)) continue;
